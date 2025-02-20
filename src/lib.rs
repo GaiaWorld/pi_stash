@@ -8,7 +8,7 @@ extern crate lazy_static;
 
 lazy_static! {
     // 全局存储js堆栈信息
-    static ref GLOBAL_STACK_STORE: Arc<StackStore> = Arc::new(StackStore::new());
+    pub static ref GLOBAL_STACK_STORE: Arc<StackStore> = Arc::new(StackStore::new());
 }
 
 /// 线程安全的栈式存储结构，使用字符串作为键，支持并发访问

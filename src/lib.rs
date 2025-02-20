@@ -6,7 +6,6 @@ use std::sync::{Arc, Mutex};
 #[macro_use]
 extern crate lazy_static;
 
-
 lazy_static! {
     // 全局存储js堆栈信息
     static ref GLOBAL_STACK_STORE: Arc<StackStore> = Arc::new(StackStore::new());
@@ -66,15 +65,17 @@ impl StackStore {
     ///
     /// # 注意
     /// 获取时会克隆整个栈内容，可能因互斥锁污染导致panic
-    pub fn iter(&self, key_filter: &str) -> Vec<(String, Vec<String>)> {
-        self.inner
+    pub fn iter(&self, key_filter: &str) -> Option<String> {
+        let r: Vec<(String, Vec<String>)> = self
+            .inner
             .iter()
             .filter(|entry| entry.key().contains(key_filter))
             .map(|entry| {
                 let stack = entry.value().lock().unwrap();
                 (entry.key().clone(), stack.clone())
             })
-            .collect()
+            .collect();
+        serde_json::to_string(&r).ok()
     }
 
     /// 删除指定键对应的整个栈

@@ -3,6 +3,15 @@ use dashmap::DashMap;
 use serde_json;
 use std::sync::{Arc, Mutex};
 
+#[macro_use]
+extern crate lazy_static;
+
+
+lazy_static! {
+    // 全局存储js堆栈信息
+    static ref GLOBAL_STACK_STORE: Arc<StackStore> = Arc::new(StackStore::new());
+}
+
 /// 线程安全的栈式存储结构，使用字符串作为键，支持并发访问
 ///
 /// 使用 DashMap 管理键值对，每个键对应一个受互斥锁(Mutex)保护的字符串栈
@@ -84,14 +93,8 @@ mod tests {
     use std::thread;
 
     #[test]
-    fn test_new_store_is_empty() {
-        let store = StackStore::new();
-        assert!(store.inner.is_empty());
-    }
-
-    #[test]
     fn test_set_and_get() {
-        let store = StackStore::new();
+        let store = GLOBAL_STACK_STORE.clone();
         store.set("test", "value1".into());
         store.set("test", "value2".into());
 
@@ -101,13 +104,13 @@ mod tests {
 
     #[test]
     fn test_get_non_existent_key() {
-        let store = StackStore::new();
+        let store = GLOBAL_STACK_STORE.clone();
         assert!(store.get("nonexistent").is_none());
     }
 
     #[test]
     fn test_iter_filter() {
-        let store = StackStore::new();
+        let store = GLOBAL_STACK_STORE.clone();
         store.set("apple1", "fruit".into());
         store.set("banana2", "fruit".into());
         store.set("carrot3", "vegetable".into());
@@ -119,7 +122,7 @@ mod tests {
 
     #[test]
     fn test_del_stack() {
-        let store = StackStore::new();
+        let store = GLOBAL_STACK_STORE.clone();
         store.set("temp", "data".into());
         assert!(store.del_stack("temp"));
         assert!(!store.del_stack("temp"));

@@ -117,8 +117,7 @@ mod tests {
         store.set("carrot3", "vegetable".into());
 
         let results = store.iter("na");
-        assert_eq!(results.len(), 1);
-        assert!(results.iter().any(|(k, _)| k == "banana2"));
+        assert_eq!(results, Some(r#"[["banana2",["fruit"]]]"#.to_string()));
     }
 
     #[test]
